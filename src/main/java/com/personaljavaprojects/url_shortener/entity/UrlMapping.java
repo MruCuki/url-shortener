@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
+import java.time.LocalDate;
+
 @Entity
 @Getter
 @Setter
@@ -23,4 +25,7 @@ public class UrlMapping {
 
     @Column(name = "short_url", unique = true, nullable = false)
     private String shortenedURL;
+
+    @Column(name = "link_expiry", nullable = false)
+    private LocalDate linkExpiry;
 }
