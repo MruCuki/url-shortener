@@ -1,6 +1,7 @@
 package com.personaljavaprojects.url_shortener.controller;
 
 import com.personaljavaprojects.url_shortener.exceptions.OriginalUrlNotFoundException;
+import com.personaljavaprojects.url_shortener.exceptions.UrlExpiredException;
 import com.personaljavaprojects.url_shortener.exceptions.UrlHashingException;
 import com.personaljavaprojects.url_shortener.model.CreateShortenedUrlRequest;
 import com.personaljavaprojects.url_shortener.model.CreateShortenedUrlResponse;
@@ -20,17 +21,26 @@ public class UrlShortenerController {
     }
 
     @PostMapping("/shorten-url")
-    public ResponseEntity<CreateShortenedUrlResponse> createShortenedURL(@RequestBody CreateShortenedUrlRequest request) {
+    public ResponseEntity<CreateShortenedUrlResponse> createShortenedURL(
+            @RequestBody CreateShortenedUrlRequest request) {
 
         String shortenedUrl;
         try {
             shortenedUrl = this.shortenedUrlService.createShortenedUrl(request.url());
         } catch (UrlHashingException e) {
             return ResponseEntity.internalServerError()
-                    .body(new CreateShortenedUrlResponse(null, request.url(), e.getMessage()));
+                    .body(new CreateShortenedUrlResponse(
+                            null,
+                            request.url(),
+                            e.getMessage())
+                    );
         }
         return ResponseEntity.ok(
-                new CreateShortenedUrlResponse(shortenedUrl, request.url(), null));
+                new CreateShortenedUrlResponse(
+                        shortenedUrl,
+                        request.url(),
+                        null)
+        );
     }
 
     @GetMapping("/shorten-url")
@@ -41,9 +51,12 @@ public class UrlShortenerController {
         String originalURL;
         try {
             originalURL = this.shortenedUrlService.getOriginalUrl(shortenedURL);
-        } catch (OriginalUrlNotFoundException e) {
+        } catch (OriginalUrlNotFoundException | UrlExpiredException e) {
             return new ModelAndView("error");
         }
-        return new ModelAndView(new StringBuilder().append("redirect:").append(originalURL).toString());
+        return new ModelAndView(new StringBuilder()
+                .append("redirect:")
+                .append(originalURL).toString()
+        );
     }
 }
